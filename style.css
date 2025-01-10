@@ -1,681 +1,196 @@
+/* General Styling */
 body {
-  font-family: Arial, open-sans;
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f4f4f9;
+  background-color: #f4f4f4;
   color: #333;
-}
-/* Style for the list when highlighted */
-.list.highlighted {
-  border: 2px solid #007bff; /* Blue border to indicate selected list */
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-}
-
-/* Style for the cards */
-.card {
-  background-color: #f4f7fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 5px 0;
-  cursor: pointer;
-  min-width: 150px;
-}
-
-/* Style when editing card text */
-.card div[contenteditable="true"] {
-  min-width: 150px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-}
-
-/* Style for the delete confirmation popup */
-.delete-confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-}
-
-.delete-confirmation p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Style for the delete buttons */
-.delete-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#yes-button {
-  background-color: #007bff; /* Blue for "Yessir" */
-  color: white;
-}
-
-#no-button {
-  background-color: #ff4d4d; /* Red for "Nah" */
-  color: white;
-}
-
-.delete-button:hover {
-  opacity: 0.8;
-}
-
-#app {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
 }
 
+#board-container {
+  margin: 20px;
+  padding: 10px;
+  width: 90%;
+  max-width: 1200px;
+}
+
+/* Add List Button */
 #add-list {
-  padding: 10px 15px;
-  background: #007bff;
+  display: inline-block;
+  padding: 10px 20px;
+  margin-bottom: 15px;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
+  font-size: 16px;
   cursor: pointer;
-  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 #add-list:hover {
-  background: #0056b3;
+  background-color: #0056b3;
 }
 
+/* Board Styling */
 #board {
   display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 20px;
-  justify-content: start;
-  flex-wrap: nowrap;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
+/* List Styling */
 .list {
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 10px;
+  background-color: white;
   width: 250px;
-  border-radius: 5px;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  min-height: 100px;
-  transition: transform 0.3s ease-in-out;
+  gap: 10px;
 }
 
-.list h3 {
+.list-title {
+  font-size: 18px;
+  font-weight: bold;
   margin: 0;
-  margin-bottom: 10px;
-  text-align: center;
+  cursor: text;
+  padding: 5px;
+  border: none;
+  outline: none;
 }
 
-.card {
-  background: #f4f4f4;
-  padding: 8px;
-  margin: 5px 0;
+.list-title:focus {
+  background-color: #f0f8ff;
   border-radius: 3px;
+}
+
+/* Add Card Button */
+.add-card {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.add-card:hover {
+  background-color: #218838;
+}
+
+/* Cards Container */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 50px;
+  padding: 5px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+/* Card Styling */
+.card {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: grab;
-  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .card:active {
   cursor: grabbing;
 }
 
-.card:hover {
-  background: #e4e4e4;
-}
-
-/* Pop-up card styling */
-.card-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
-  width: 100%;
-  display: none;
-}
-
-.card-popup input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
-
-.card-popup button {
-  padding: 8px 12px;
-  background: red;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.card-popup button:hover {
-  background: darkred;
-}
-
-button {
-  padding: 10px 15px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #0056b3;
-}
-
-/* Dragging effect */
-.dragging {
-  opacity: 0.5;
-  transform: scale(1.05);
-  transition: transform 0.2s ease;
-}
-#accept-button {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-#accept-button:hover {
-  background-color: #0056b3;
-}
-
-/* Style for the card being dragged */
-.card.dragging {
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-/* Style for lists when hovered over */
-.list:hover {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue highlight */
-  border: 1px solid #007bff; /* Blue border */
-}
-
-/* Make card translucent when hovering over the list */
-.list .cards {
-  position: relative;
-}
-
-.list .cards:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-/* Style for the card being dragged */
-.card.dragging {
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-/* Style for lists when hovered over */
-.list:hover {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue highlight */
-  border: 1px solid #007bff; /* Blue border */
-}
-
-/* Make card translucent when hovering over the list */
-.list .cards {
-  position: relative;
-}
-
-.list .cards:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-/* Style for the card being dragged */
-.card.dragging {
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-/* Style for lists when hovered over */
-.list:hover {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue highlight */
-  border: 1px solid #007bff; /* Blue border */
-}
-
-/* Style for the "New Card" button hover effect */
-.add-card {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-card:hover {
-  background-color: #0056b3; /* Darker blue when hovered */
-}
-/* Style for the list and cards container */
-.list .cards {
-  position: relative;
-  padding: 10px 20px; /* Increase padding to make the hitbox bigger */
-  min-height: 150px; /* Ensure the list has a minimum height for easier drops */
-  border: 1px dashed #ccc; /* Add a dashed border for visual indication */
-  margin-top: 10px;
-}
-
-/* Style for the card being dragged */
-.card.dragging {
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-/* Style for the list when hovered over */
-.list:hover {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue highlight */
-  border: 1px solid #007bff; /* Blue border */
-}
-
-/* Add style for the new card button */
-.add-card {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-card:hover {
-  background-color: #0056b3; /* Darker blue when hovered */
-}
-/* Style for the list when highlighted */
-.list.highlighted {
-  border: 2px solid #007bff; /* Blue border to indicate selected list */
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-}
-
-/* Style for the delete confirmation popup */
-.delete-confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-}
-
-.delete-confirmation p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Style for the delete buttons */
-.delete-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#yes-button {
-  background-color: #ff4d4d; /* Blue for "Nah" */
-  color: white;
-}
-
-#no-button {
-  background-color: #007bff; /* Red for "Yessir" */
-  color: white;
-}
-
-.delete-button:hover {
-  opacity: 0.8;
-}
-/* Style for the list when highlighted */
-.list.highlighted {
-  border: 2px solid #007bff; /* Blue border to indicate selected list */
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-}
-
-/* Style for the delete confirmation popup */
-.delete-confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-}
-
-.delete-confirmation p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Style for the delete buttons */
-.delete-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#yes-button {
-  background-color: #ff4d4d; /* Blue for "Nah" */
-  color: white;
-}
-
-#no-button {
-  background-color: #007bff; /* Red for "Yes" */
-  color: white;
-}
-
-.delete-button:hover {
-  opacity: 0.8;
-}
-/* Style for the list when highlighted */
-.list.highlighted {
-  border: 2px solid #007bff; /* Blue border to indicate selected list */
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-}
-
-/* Style for the cards */
-.card {
-  background-color: #f4f7fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 5px 0;
-  cursor: pointer;
-  min-width: 150px;
-}
-
-/* Style when editing card text */
-.card div[contenteditable="true"] {
-  min-width: 150px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-}
-
-/* Style for the drop area highlight */
-.cards.highlight-drop-area {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue to indicate the drop area */
-  border: 2px dashed #007bff; /* Blue dashed border */
-  padding: 10px;
-}
-
-/* Style for the delete confirmation popup */
-.delete-confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-}
-
-.delete-confirmation p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Style for the delete buttons */
-.delete-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#yes-button {
-  background-color: #007bff; /* Blue for "Yessir" */
-  color: white;
-}
-
-#no-button {
-  background-color: #ff4d4d; /* Red for "Nah" */
-  color: white;
-}
-
-.delete-button:hover {
-  opacity: 0.8;
-}
-/* General list and card styles */
-.list {
-  display: inline-block;
-  width: 250px;
-  margin: 20px;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  vertical-align: top;
-}
-
-.card {
-  background-color: #f4f7fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 5px 0;
-  cursor: pointer;
-  min-width: 150px;
-}
-
-/* Highlighting specific parts of the card */
-.card:hover .card-title {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background for title */
-  border-radius: 3px;
-}
-
-/* Highlighting the Add Card button when hovering */
-.add-card:hover {
-  background-color: rgba(0, 123, 255, 0.2); /* Light blue for add card button */
-}
-
-/* Style when editing card text */
-.card div[contenteditable="true"] {
-  min-width: 150px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-}
-
-/* Highlight the drop area */
-.cards.highlight-drop-area {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background to indicate valid drop area */
-  border: 2px dashed #007bff; /* Dashed border */
-}
-
-/* Style for the delete confirmation popup */
-.delete-confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-}
-
-.delete-confirmation p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-/* Style for the delete buttons */
-.delete-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#yes-button {
-  background-color: #007bff; /* Blue for "Yessir" */
-  color: white;
-}
-
-#no-button {
-  background-color: #ff4d4d; /* Red for "Nah" */
-  color: white;
-}
-
-.delete-button:hover {
-  opacity: 0.8;
-}
-/* Container for all the lists (Flexbox layout) */
-#board {
-  display: flex;
-  flex-direction: row; /* Horizontal layout */
-  overflow-x: auto; /* Allow horizontal scrolling */
-  padding: 10px;
-  gap: 20px; /* Space between the lists */
-  align-items: flex-start; /* Align items at the top */
-  position: relative;
-}
-
-/* General list and card styles */
-.list {
-  display: inline-block;
-  width: 250px;
+.card-text {
   margin: 0;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  vertical-align: top;
-  position: relative;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-.card {
-  background-color: #f4f7fa;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 5px 0;
-  cursor: pointer;
-  min-width: 150px;
+.due-date {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
 }
 
-/* Highlighting specific parts of the card */
-.card:hover .card-title {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background for title */
+.due-date span {
+  color: #333;
+  border: 1px dashed #ccc;
+  padding: 2px 5px;
   border-radius: 3px;
+  cursor: text;
 }
 
-/* Highlighting the Add Card button when hovering */
-.add-card:hover {
-  background-color: rgba(0, 123, 255, 0.2); /* Light blue for add card button */
+.due-date span:focus {
+  outline: none;
+  border: 1px dashed #007bff;
+  background-color: #f0f8ff;
 }
 
-/* Style when editing card text */
-.card div[contenteditable="true"] {
-  min-width: 150px;
-  padding: 8px;
-  border: 1px solid #ccc;
+/* Highlighted Elements */
+.highlighted {
+  border: 2px solid #007bff;
   border-radius: 5px;
-  background-color: #fff;
 }
 
-/* Highlight the drop area */
-.cards.highlight-drop-area {
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background to indicate valid drop area */
-  border: 2px dashed #007bff; /* Dashed border */
-}
-
-/* Style for the delete confirmation popup */
+/* Delete Confirmation Popup */
 .delete-confirmation {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
   text-align: center;
 }
 
 .delete-confirmation p {
-  font-size: 18px;
+  font-size: 16px;
   margin-bottom: 20px;
 }
 
-/* Style for the delete buttons */
-.delete-button {
+.delete-confirmation .delete-button {
   padding: 10px 20px;
-  margin: 10px;
+  margin: 5px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
 #yes-button {
-  background-color: #ff4d4d; /* Red for "Delete" */
+  background-color: #dc3545;
   color: white;
+}
+
+#yes-button:hover {
+  background-color: #c82333;
 }
 
 #no-button {
-  background-color: #007bff; /* Blue for "Go Back" */
+  background-color: #6c757d;
   color: white;
 }
 
-.delete-button:hover {
-  opacity: 0.8;
+#no-button:hover {
+  background-color: #5a6268;
 }
 
-/* Add List button styles */
-#add-list {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Drop Highlight */
+.cards.highlight-drop-area {
+  background-color: #e7f3ff;
+  border: 2px dashed #007bff;
 }
 
-#add-list:hover {
-  background-color: #0056b3;
-}
 
