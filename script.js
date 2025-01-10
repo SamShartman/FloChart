@@ -2,6 +2,7 @@
 const board = document.getElementById('board');
 const addListBtn = document.getElementById('add-list');
 let draggedCard = null; // For dragging cards
+let draggedList = null; // For dragging lists
 let selectedList = null; // To store the currently selected list
 let selectedCard = null; // To store the currently selected card
 let isEditingCard = false; // Flag to track card editing state
@@ -23,7 +24,7 @@ function createList(title = 'Enter List Name') {
 
   // Event listener to highlight the list when clicked
   list.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent click from propagating to the background
+    e.stopPropagation();
     if (selectedList) {
       selectedList.classList.remove('highlighted');
     }
@@ -31,120 +32,128 @@ function createList(title = 'Enter List Name') {
     selectedList.classList.add('highlighted');
   });
 
+  // Enable list dragging
+  list.addEventListener('dragstart', (e) => {
+    draggedList = list;
+    list.style.opacity = '0.5';
+  });
+
+  list.addEventListener('dragend', () => {
+    draggedList = null;
+    list.style.opacity = '1';
+  });
+
   // Add event listener to add a new card
   const addCardButton = list.querySelector('.add-card');
   addCardButton.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent click from propagating to the background
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.setAttribute('draggable', 'true');
-    card.innerText = 'New Card';
-    card.addEventListener('dragstart', (e) => {
-      e.target.classList.add('dragging');
-      draggedCard = e.target;
-    });
-    card.addEventListener('dragend', (e) => {
-      e.target.classList.remove('dragging');
-      draggedCard = null;
-    });
-
-    // Add double-click event to edit card text
-    card.addEventListener('dblclick', (e) => {
-      e.stopPropagation(); // Prevent click from propagating to the background
-      if (!isEditingCard) {
-        editCardText(card);
-      }
-    });
-
+    e.stopPropagation();
+    const card = createCard('New Card');
     list.querySelector('.cards').appendChild(card);
   });
 
   board.appendChild(list);
 }
 
+// Function to create a new card
+function createCard(text = 'New Card') {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.setAttribute('draggable', 'true');
+  card.innerHTML = `
+    <p class="card-text">${text}</p>
+    <div class="due-date">
+      Due Date: <span contenteditable="true">Set Date</span>
+    </div>
+  `;
+
+  // Enable card dragging
+  card.addEventListener('dragstart', (e) => {
+    e.target.classList.add('dragging');
+    draggedCard = e.target;
+  });
+
+  card.addEventListener('dragend', (e) => {
+    e.target.classList.remove('dragging');
+    draggedCard = null;
+  });
+
+  // Add double-click event to edit card text
+  card.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    if (!isEditingCard) {
+      editCardText(card);
+    }
+  });
+
+  return card;
+}
+
 // Function to handle editing of card text
 function editCardText(card) {
-  const originalText = card.innerText;
+  const originalText = card.querySelector('.card-text').innerText;
   const editableDiv = document.createElement('div');
   editableDiv.contentEditable = 'true';
   editableDiv.innerText = originalText;
   card.innerHTML = '';
   card.appendChild(editableDiv);
 
-  // When user presses Enter, save the changes
   editableDiv.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      card.innerText = editableDiv.innerText; // Save changes
-      isEditingCard = false; // Disable editing mode
+      card.innerHTML = `<p class="card-text">${editableDiv.innerText}</p>`;
+      isEditingCard = false;
     }
   });
 
-  // When user clicks outside, save the changes
   editableDiv.addEventListener('blur', () => {
-    card.innerText = editableDiv.innerText; // Save changes
-    isEditingCard = false; // Disable editing mode
+    card.innerHTML = `<p class="card-text">${editableDiv.innerText}</p>`;
+    isEditingCard = false;
   });
 
-  isEditingCard = true; // Enable editing mode
-  selectedCard = card; // Track the card being edited
+  isEditingCard = true;
+  selectedCard = card;
 }
 
-// Allow card to be dropped
+// Allow card or list to be dropped
 function allowDrop(e) {
   e.preventDefault();
-  const list = e.target.closest('.list');
-  if (list) {
-    // Add translucent effect to the dragged card
-    draggedCard.style.opacity = '0.5';
-    // Highlight the drop area with a lighter color
-    const dropArea = list.querySelector('.cards');
-    dropArea.classList.add('highlight-drop-area');
-  }
 }
 
-// Handle dropping a card into a new list
+// Handle dropping a card or list
 function drop(e) {
   e.preventDefault();
   const target = e.target.closest('.cards');
   if (target && draggedCard) {
-    // Drop the card into the list
     target.appendChild(draggedCard);
-    draggedCard.style.opacity = '1'; // Restore the original opacity
-  }
-  // Remove the drop highlight
-  const dropArea = e.target.closest('.cards');
-  if (dropArea) {
-    dropArea.classList.remove('highlight-drop-area');
+  } else if (draggedList) {
+    const board = document.getElementById('board');
+    const afterElement = getDragAfterElement(board, e.clientX);
+    if (afterElement) {
+      board.insertBefore(draggedList, afterElement);
+    } else {
+      board.appendChild(draggedList);
+    }
   }
 }
 
-// Detect pressing Backspace and show delete confirmation dialog
-document.addEventListener('keydown', (e) => {
-  // Check if a card is being edited or a contenteditable field is focused
-  if (document.activeElement && document.activeElement.isContentEditable) {
-    isTyping = true; // User is typing, prevent deletion
-  } else {
-    isTyping = false; // No typing happening
-  }
+// Helper function to find the element after the drag
+function getDragAfterElement(container, x) {
+  const draggableElements = [...container.querySelectorAll('.list:not(.dragging)')];
 
-  if (!isTyping) {
-    if (e.key === 'Backspace' && selectedList && !isEditingCard) {
-      showDeleteConfirmation();
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = x - box.left - box.width / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset, element: child };
+    } else {
+      return closest;
     }
-
-    if (e.key === 'Enter' && selectedList && !isEditingCard) {
-      // Prevent Enter from triggering list deletion while typing
-      if (!document.activeElement.isContentEditable) {
-        showDeleteConfirmation();
-      }
-    }
-  }
-});
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
 
 // Show delete confirmation dialog
 function showDeleteConfirmation() {
   if (deleteConfirmationPopup) {
-    return; // Prevent showing the popup if it's already visible
+    return;
   }
 
   deleteConfirmationPopup = document.createElement('div');
@@ -155,30 +164,18 @@ function showDeleteConfirmation() {
     <button class="delete-button" id="yes-button">Delete</button>
   `;
 
-  // Append to body and show the confirmation
   document.body.appendChild(deleteConfirmationPopup);
 
-  // Get buttons
   const yesButton = deleteConfirmationPopup.querySelector('#yes-button');
   const noButton = deleteConfirmationPopup.querySelector('#no-button');
 
-  // Handle "Delete" button (Delete the list and close the confirmation)
   yesButton.addEventListener('click', () => {
     selectedList.remove();
     closeDeleteConfirmation();
   });
 
-  // Handle "Go Back" button (Do nothing, close the confirmation)
   noButton.addEventListener('click', () => {
     closeDeleteConfirmation();
-  });
-
-  // Add keydown event listener to trigger 'Delete' on Enter key
-  document.addEventListener('keydown', function handleEnterKey(event) {
-    if (event.key === 'Enter') {
-      yesButton.click(); // Trigger the "Delete" button click
-      document.removeEventListener('keydown', handleEnterKey); // Remove the event listener once Enter is pressed
-    }
   });
 }
 
@@ -186,7 +183,7 @@ function showDeleteConfirmation() {
 function closeDeleteConfirmation() {
   if (deleteConfirmationPopup) {
     deleteConfirmationPopup.remove();
-    deleteConfirmationPopup = null; // Clear the reference
+    deleteConfirmationPopup = null;
   }
 }
 
@@ -201,24 +198,13 @@ createList();
 // Deselect lists/cards when clicking anywhere on the background
 document.body.addEventListener('click', (e) => {
   if (!e.target.closest('.list') && !e.target.closest('.card')) {
-    // Deselect list
     if (selectedList) {
       selectedList.classList.remove('highlighted');
       selectedList = null;
     }
-
-    // Deselect card
     if (selectedCard) {
       selectedCard.classList.remove('highlighted');
       selectedCard = null;
     }
-
-    // If a card is being edited, save it when deselecting
-    if (isEditingCard && selectedCard) {
-      const cardText = selectedCard.querySelector('[contenteditable="true"]').innerText;
-      selectedCard.innerText = cardText;
-      isEditingCard = false;
-    }
   }
 });
-
