@@ -1,116 +1,96 @@
-// DOM Elements
 const board = document.getElementById('board');
 const addListBtn = document.getElementById('add-list');
+const boardTitle = document.getElementById('board-title');
 
-// Drag-and-Drop Variables
-let draggedItem = null;
-let draggedList = null;
+// Save and load board title
+boardTitle.addEventListener('blur', () => {
+  const titleText = boardTitle.innerText.trim();
+  localStorage.setItem('boardTitle', titleText || 'My Kanban Board');
+});
+window.addEventListener('load', () => {
+  const savedTitle = localStorage.getItem('boardTitle');
+  boardTitle.innerText = savedTitle || 'My Kanban Board';
+});
+
+let draggedCard = null; // For tracking dragged cards
 
 // Create a new list
 function createList(title = 'Enter List Name') {
   const list = document.createElement('div');
   list.className = 'list';
-  list.draggable = true;
+  list.setAttribute('draggable', 'true');
   list.innerHTML = `
-    <input class="list-title" value="${title}">
+    <h3 class="list-title" contenteditable="true">${title}</h3>
     <button class="add-card">+ Add Card</button>
-    <div class="cards"></div>
-    <button class="delete-btn">🗑</button>
+    <div class="cards" ondrop="event.preventDefault();" ondragover="event.preventDefault();"></div>
+    <button class="delete-list">Delete List</button>
   `;
 
-  list.addEventListener('dragstart', () => (draggedList = list));
-  list.addEventListener('dragover', (e) => e.preventDefault());
-  list.addEventListener('drop', () => {
-    if (draggedList) board.insertBefore(draggedList, list.nextSibling);
+  // Add card functionality
+  list.querySelector('.add-card').addEventListener('click', () => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('draggable', 'true');
+    card.innerHTML = `
+      <span contenteditable="true">New Card</span>
+      <input type="date" class="due-date" />
+      <button class="delete-card">X</button>
+    `;
+    list.querySelector('.cards').appendChild(card);
+
+    enableCardDragging(card);
+
+    // Delete card functionality
+    card.querySelector('.delete-card').addEventListener('click', () => {
+      card.remove();
+    });
   });
 
-  const addCardBtn = list.querySelector('.add-card');
-  addCardBtn.addEventListener('click', () => createCard(list.querySelector('.cards')));
-
-  const deleteBtn = list.querySelector('.delete-btn');
-  deleteBtn.addEventListener('click', () => list.remove());
+  // Delete list functionality
+  list.querySelector('.delete-list').addEventListener('click', () => {
+    list.remove();
+  });
 
   board.appendChild(list);
 }
 
-// Create a new card
-function createCard(container) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.draggable = true;
-  card.innerHTML = `
-    <input class="card-text" value="New Card">
-    <button class="add-due-date">+ Add Due Date</button>
-    <div class="due-date"></div>
-    <button class="delete-btn">🗑</button>
-  `;
-
-  card.addEventListener('dragstart', () => (draggedItem = card));
-  card.addEventListener('dragover', (e) => e.preventDefault());
-  card.addEventListener('drop', () => {
-    if (draggedItem && draggedItem !== card) container.appendChild(draggedItem);
+// Enable card dragging functionality
+function enableCardDragging(card) {
+  card.addEventListener('dragstart', (e) => {
+    draggedCard = card;
+    card.classList.add('dragging');
   });
-
-  const dueDateBtn = card.querySelector('.add-due-date');
-  dueDateBtn.addEventListener('click', () => {
-    const dateInput = prompt('Enter Due Date (YYYY-MM-DD):');
-    if (dateInput) {
-      card.querySelector('.due-date').innerText = `Due: ${dateInput}`;
-    }
+  card.addEventListener('dragend', () => {
+    draggedCard = null;
+    card.classList.remove('dragging');
   });
-
-  const deleteBtn = card.querySelector('.delete-btn');
-  deleteBtn.addEventListener('click', () => card.remove());
-
-  container.appendChild(card);
 }
 
-// Add initial list
+// Handle card drag-and-drop (cards between lists)
+board.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const cardContainer = e.target.closest('.cards');
+  if (cardContainer && draggedCard) {
+    cardContainer.classList.add('dragover');
+  }
+});
+board.addEventListener('dragleave', (e) => {
+  const cardContainer = e.target.closest('.cards');
+  if (cardContainer) {
+    cardContainer.classList.remove('dragover');
+  }
+});
+board.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const cardContainer = e.target.closest('.cards');
+  if (cardContainer && draggedCard) {
+    cardContainer.appendChild(draggedCard);
+    cardContainer.classList.remove('dragover');
+  }
+});
+
+// Add a new list
 addListBtn.addEventListener('click', () => createList());
+
+// Initialize with one list
 createList();
-// Create a new card
-function createCard(container) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.draggable = true;
-  card.innerHTML = `
-    <input class="card-text" value="New Card">
-    <button class="add-due-date">+ Add Due Date</button>
-    <div class="due-date-container">
-      <input type="date" class="due-date" style="display: none;">
-      <span class="due-date-display"></span>
-    </div>
-    <button class="delete-btn">🗑</button>
-  `;
-
-  card.addEventListener('dragstart', () => (draggedItem = card));
-  card.addEventListener('dragover', (e) => e.preventDefault());
-  card.addEventListener('drop', () => {
-    if (draggedItem && draggedItem !== card) container.appendChild(draggedItem);
-  });
-
-  // Due date functionality
-  const dueDateBtn = card.querySelector('.add-due-date');
-  const dueDateInput = card.querySelector('.due-date');
-  const dueDateDisplay = card.querySelector('.due-date-display');
-
-  dueDateBtn.addEventListener('click', () => {
-    dueDateInput.style.display = 'inline-block';
-    dueDateInput.focus();
-  });
-
-  dueDateInput.addEventListener('change', () => {
-    if (dueDateInput.value) {
-      dueDateDisplay.textContent = `Due: ${dueDateInput.value}`;
-      dueDateInput.style.display = 'none';
-      dueDateBtn.style.display = 'none';
-    }
-  });
-
-  // Delete button functionality
-  const deleteBtn = card.querySelector('.delete-btn');
-  deleteBtn.addEventListener('click', () => card.remove());
-
-  container.appendChild(card);
-}
-
